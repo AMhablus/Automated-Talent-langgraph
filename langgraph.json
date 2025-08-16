@@ -1,0 +1,12 @@
+{
+  "graphs": {
+    "Automated-Talent": "src.agent.graph:graph"
+  },
+  "env": "./.env",
+  "dependencies": [
+    "langchain-community",
+    "langchain-openai",
+    "langchain-groq",
+    "langgraph"
+  ]
+}

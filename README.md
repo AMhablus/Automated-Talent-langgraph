@@ -1,166 +1,121 @@
 # CV Analysis Agent
 
-An AI-powered CV analysis tool that evaluates candidate resumes against job descriptions to provide intelligent screening recommendations.
+An AI-powered CV analysis tool that evaluates resumes against job descriptions and provides intelligent screening recommendations via a Streamlit web app.
 
 ## 🚀 Features
 
-- **Dynamic Input Processing**: Upload any CV in PDF format and input custom job descriptions
-- **Intelligent Analysis**: Uses advanced LLM models to extract candidate information and analyze skills
-- **Comprehensive Evaluation**: Provides pre-screening status, skills matching, and final recommendations
-- **Multiple Interfaces**: Choose between web UI, command-line, or interactive terminal
-- **Detailed Results**: Get skills analysis, gap identification, and actionable insights
+- **Web UI (Streamlit)**: Upload a CV (PDF) and paste a job description
+- **Prescreening**: Extracts entities and determines pass/fail based on basic requirements
+- **Skills Analysis**: Matches, missing, and additional skills with an overall score (0–100)
+- **Recommendations**: Final decision routed to Interview, Phone Screen, or Rejected
+- **Download Results**: Export a concise text summary of the analysis
 
-## 🛠️ Installation
+## 🛠️ Requirements
 
-1. Clone the repository:
+- Python 3.12+
+- Dependencies from `requirements.txt` or `pyproject.toml` (managed via `pip` or `uv`)
+
+## 📦 Installation
+
+1) Clone the repository
 ```bash
 git clone <repository-url>
-cd cv-project
+cd "cv project"
 ```
 
-2. Install dependencies:
+2) Install dependencies (pick one)
 ```bash
+# Using pip
 pip install -r requirements.txt
+
+# Or using uv (optional)
+uv pip install -r requirements.txt
 ```
 
-3. Set up environment variables:
+3) Configure environment
 ```bash
-# Create a .env file with your API keys
-OPENAI_API_KEY=your_openai_api_key_here
+# Create a .env file in the project root
+GROQ_API_KEY=your_api_key_here
 ```
+
 
 ## 🎯 Usage
 
-### Option 1: Web Interface (Recommended)
-
-Launch the Streamlit web application for an intuitive user experience:
-
+Run the Streamlit app from the project root:
 ```bash
 streamlit run app.py
 ```
 
-**Features:**
-- Drag-and-drop PDF upload
-- Rich text input for job descriptions
-- Visual results with progress bars and metrics
-- Downloadable analysis reports
-- Responsive design
+In the sidebar:
+- Upload a CV PDF
+- Paste the job description
+- Click “Analyze CV”
 
-### Option 2: Command Line Interface
+The results view shows candidate info, prescreening status, a skills breakdown with score, the final decision, and (if rejected) a brief rejection reason. You can download a text summary.
 
-Use the CLI for automation and scripting:
+## 🔍 How it works
 
-```bash
-# Analyze CV with job description from command line
-python cli.py --cv path/to/cv.pdf --jd "Software Engineer position requiring Python, ML, and 3+ years experience"
+- `src/agent/graph.py`: Builds a LangGraph state machine with nodes:
+  - `prescreening_analysis` → extract fields and set `pre_screening_status`
+  - `skills_analysis` → compute matched/missing/additional and `score`
+  - terminal nodes: `interview`, `phone_screen`, `reject`
+- `src/agent/nodes.py`: Implements node functions and routing rules:
+  - Route 1: If `pre_screening_status` is Pass → `skills_analysis`; otherwise → `reject`
+  - Route 2: If `score` > 80 → Interview; 50–80 → Phone Screen; < 50 → Rejected
+  - `reject` also generates a short `rejection_reason`
+- `src/agent/prompts.py`: System prompts for prescreening, skills analysis, and rejection text
+- `src/agent/state.py`: TypedDict definitions for the shared state
 
-# Analyze CV with job description from file
-python cli.py --cv path/to/cv.pdf --jd-file path/to/job_description.txt
-
-# Save results to output file
-python cli.py --cv path/to/cv.pdf --jd "Job description..." --output results.txt
-```
-
-### Option 3: Interactive Terminal
-
-Run the interactive Python script:
-
-```bash
-python main.py
-```
-
-Follow the prompts to input CV file path and job description.
-
-## 📊 What You Get
-
-### Candidate Information Extraction
-- Name, email, phone number
-- Years of experience
-- Technical skills and competencies
-
-### Skills Analysis
-- **Matched Skills**: Skills that align with job requirements
-- **Missing Skills**: Skills you might need to develop
-- **Additional Skills**: Extra skills that could be beneficial
-- **Overall Score**: Numerical assessment (0-100)
-
-### Final Recommendations
-- **Interview**: High match (score > 80)
-- **Phone Screen**: Moderate match (score 50-80)
-- **Rejected**: Low match (score < 50)
-
-## 🔧 Configuration
-
-### Environment Variables
-- `OPENAI_API_KEY`: Your OpenAI API key for LLM access
-
-### Model Configuration
-The agent uses Groq's LLM service by default. You can modify the model in `src/agent/nodes.py`:
-
-```python
-LLM = ChatGroq(model="openai/gpt-oss-120b", temperature=0, api_key=SecretStr(OPENAI_API_KEY))
-```
-
-## 📁 Project Structure
+## 📁 Project structure
 
 ```
-cv-project/
-├── src/agent/
-│   ├── nodes.py          # Core analysis functions
-│   ├── state.py          # Data structures
-│   ├── graph.py          # LangGraph workflow
-│   ├── prompts.py        # LLM prompts
-│   └── examples.py       # Sample data
-├── app.py                # Streamlit web interface
-├── cli.py                # Command-line interface
-├── main.py               # Interactive terminal interface
-├── requirements.txt      # Python dependencies
-└── README.md            # This file
+cv project/
+├── app.py                   # Streamlit web interface
+├── requirements.txt         # Dependencies
+├── pyproject.toml           # Alternative dependency manifest
+├── src/
+│   └── agent/
+│       ├── graph.py         # LangGraph workflow
+│       ├── nodes.py         # Core analysis and routing
+│       ├── prompts.py       # LLM system prompts
+│       ├── state.py         # Shared state schema
+│       ├── examples.py      # Sample CV/JD text
+│       └── test.ipynb       # Notebook playground
+└── README.md
 ```
 
-## 🎨 Customization
+## ⚙️ Configuration
 
-### Adding New Analysis Criteria
-Modify the prompts in `src/agent/prompts.py` to include additional evaluation criteria.
+- Model/provider: `ChatGroq` with model `openai/gpt-oss-120b` (see `src/agent/nodes.py`)
+- Environment: `GROQ_API_KEY` read from `.env` via `python-dotenv`
+- PDF parsing: LangChain `PyPDFLoader` (backed by `pypdf`)
 
-### Extending the Workflow
-Add new nodes to the graph in `src/agent/graph.py` for additional processing steps.
+## 📊 Output details
 
-### Custom Output Formats
-Modify the result formatting in any of the interface files to match your needs.
+- Candidate: `name`, `email`, `phone`, `years_of_experience`, `skills`
+- Prescreening: `pre_screening_status` (Pass/Fail)
+- Skills analysis: `matched`, `missing`, `additional`, `score` (0–100)
+- Decision: `final_decision` (Interview, Phone Screen, Rejected)
+- If rejected: short `rejection_reason`
 
 ## 🚨 Troubleshooting
 
-### Common Issues
+- “Please upload a CV / provide a job description”: Both inputs are required before running
+- PDF text extraction errors: Ensure the file is a valid, non-password-protected PDF
+- API key errors: Confirm `.env` exists and `GROQ_API_KEY` is set
 
-1. **PDF Processing Errors**: Ensure the PDF is not password-protected and contains extractable text
-2. **API Key Issues**: Verify your OpenAI API key is correctly set in the `.env` file
-3. **Memory Issues**: Large PDFs may require more memory; consider splitting very long documents
+## 🧩 Notes
 
-### Error Messages
-- `File not found`: Check the file path and ensure the PDF exists
-- `Invalid PDF format`: Ensure the file is a valid PDF with extractable text
-- `API rate limit`: Wait a moment and try again
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests if applicable
-5. Submit a pull request
+- This repository currently exposes only the Streamlit interface. There is no CLI or separate interactive terminal app.
+- The `examples.py` file contains sample CV/JD text you can use for testing.
+- The graph rendering in `src/agent/graph.py` uses IPython display when run in a notebook; it is safe when imported by the app.
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
-
-## 🙏 Acknowledgments
-
-- Built with LangGraph for workflow orchestration
-- Powered by Groq's LLM services
-- Uses Streamlit for the web interface
-- PDF processing with PyPDF2
+No license file is included in the repository.
 
 ---
 
-**Happy CV analyzing! 🎉**
+Happy CV analyzing! 🎉
+
+

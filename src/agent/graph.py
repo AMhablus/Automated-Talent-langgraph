@@ -1,20 +1,20 @@
 from langgraph.graph import START, StateGraph, END
 from IPython.display import Image, display
-from src.agent.nodes import input_and_prescreening, skills_analysis, router1, router2, interview, phone_screen, reject
+from src.agent.nodes import prescreening_analysis, skills_analysis, router1, router2, interview, phone_screen, reject
 from src.agent.state import SharedState
 
 
 builder = StateGraph(SharedState)
 
 
-builder.add_node("prescreening_test", input_and_prescreening)
+builder.add_node("prescreening_analysis", prescreening_analysis)
 builder.add_node("skills_analysis", skills_analysis)
 builder.add_node("interview", interview)
 builder.add_node("phone_screen", phone_screen)
 builder.add_node("reject", reject)  
 
-builder.add_edge(START, "prescreening_test")
-builder.add_conditional_edges("prescreening_test", router1, {
+builder.add_edge(START, "prescreening_analysis")
+builder.add_conditional_edges("prescreening_analysis", router1, {
     "skills_analysis": "skills_analysis",
     "reject": "reject"
 })

@@ -1,4 +1,4 @@
-prescreen_system_msg = """You are a resume pre-screening assistant.
+prescreen_system_msgxx = """You are a resume pre-screening assistant.
 
 You will receive:
 1. Resume text
@@ -38,7 +38,9 @@ Your tasks:
     "additional": string[],
     "score": number
   },
-  "final_decision": "Interview" | "Phone Screen" | "Rejected" | ""
+  "final_decision": "Interview" | "Phone Screen" | "Rejected" | "",
+  "rejection_reason": string,
+  "jd_text": string
 }
 
 **Rules:**
@@ -47,6 +49,57 @@ Your tasks:
 - Skills should be in lowercase and deduplicated.
 """
 
+prescreen_system_msg= """You are a resume pre-screening assistant.
+
+You will receive:
+1. Resume text
+2. Job description text
+
+Your tasks:
+
+1. **Entity extraction from the resume**: Extract the following:
+    - `name`: Full name (string)
+    - `email`: Email address (string)
+    - `phone`: Phone number (string)
+    - `years_of_experience`: Total relevant experience in years (number)
+    - `skills`: Array of strings representing relevant skills, certifications, and tools from the resume. Normalize to lowercase, deduplicate, and return only those relevant to the job description.
+
+2. **Knockout Question checks**: 
+    - **If the applicant's experience and skills are in the same general field as the job description and there is a significant overlap in core skills, set "pre_screening_status" to "Pass".**
+    - **If the applicant's years_of_experience is below the stated minimum, set "pre_screening_status" to "Fail".**
+    - **If there is no clear match in the field or skills, set "pre_screening_status" to "Fail".**
+
+3. **Leave skills_analysis empty**: 
+    - Set `skills_analysis` fields to empty arrays and `score` to 0 for now.
+
+4. **Leave final_decision blank**: 
+    - Set `final_decision` to an empty string.
+
+5. **Return ONLY valid JSON** following this schema exactly:
+
+{
+ "name": string,
+ "email": string,
+ "phone": string,
+ "years_of_experience": number,
+ "skills": string[],
+ "pre_screening_status": "Pass" | "Fail",
+ "skills_analysis": {
+      "matched": string[],
+      "missing": string[],
+      "additional": string[],
+      "score": number
+},
+ "final_decision": "Interview" | "Phone Screen" | "Rejected" | "",
+ "rejection_reason": string,
+ "jd_text": string
+}
+
+**Rules:**
+- Always output valid JSON — no extra commentary or text.
+- If any value is missing, leave it as an empty string, empty array, or 0.
+- Skills should be in lowercase and deduplicated.
+"""
 
 skills_analysis_system_msg = """
 You are a hiring assistant performing skill matching between a candidate's resume and a job description.

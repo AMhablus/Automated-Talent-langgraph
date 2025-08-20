@@ -83,3 +83,85 @@ Proficiency in using Docker for containerization and deployment
 Experience with cloud platforms (e.g., AWS, GCP, Azure) and CI/CD pipelines is a strong plus
 Good command of software version control (e.g., Git) and collaborative development workflows
 Bonus: Experience with data engineering, MLOps, or research publication"""
+
+
+jd_75_score = """Job Description: Data Scientist
+About the Role:
+
+We are seeking a Data Scientist to analyze complex datasets and provide data-driven insights to guide business decisions. The ideal candidate has a strong foundation in machine learning and a passion for data storytelling.
+
+Responsibilities:
+
+Perform statistical analysis and A/B testing to evaluate product performance.
+
+Develop, validate, and deploy predictive models to solve business problems.
+
+Clean, transform, and analyze large datasets using SQL and Python.
+
+Create data visualizations and dashboards to communicate findings to stakeholders.
+
+Collaborate with engineering teams to integrate models into production systems.
+
+Required Skills and Qualifications:
+
+
+Education: Bachelor's degree in Artificial Intelligence or a related quantitative field.
+
+
+Technical Skills: Proficient in Python and a solid understanding of Data Structures and Algorithms.
+
+
+
+ML Expertise: Experience with machine learning and deep learning frameworks, including TensorFlow or PyTorch.
+
+Domain Knowledge: Hands-on experience with statistical analysis, business intelligence, and SQL.
+
+
+Tools: Experience with Git and data visualization libraries like Matplotlib.
+
+Experience: Demonstrated ability to work on data-centric projects, such as predictive modeling or classification."""
+
+jd_100_score = """Job Description: Machine Learning Engineer
+About the Role:
+
+We are seeking a highly motivated and skilled Machine Learning Engineer to join our team. The ideal candidate will have a strong foundation in machine learning principles and hands-on experience in developing and deploying models for real-world applications. This role requires a background in artificial intelligence and a passion for using data to solve complex problems.
+
+Responsibilities:
+
+Design, develop, and implement machine learning models using various architectures, including Feedforward Neural Networks (FNNs) and Convolutional Neural Networks (CNNs).
+
+Apply advanced data preprocessing, feature scaling, and outlier removal techniques to prepare datasets for modeling.
+
+Evaluate model performance using key metrics such as MAE, RMSE, and 
+
+R 
+2
+ .
+
+Utilize machine learning libraries such as 
+
+TensorFlow, Pytorch, and Pandas to build and train models.
+
+Collaborate on projects involving innovative neural network architectures, such as the Kolmogorov-Arnold Network (KAN), for challenging tasks like medical image classification.
+
+Contribute to projects related to cognitive performance prediction and similar analytical tasks.
+
+Required Skills and Qualifications:
+
+
+Education: Bachelor of Engineering in Artificial Intelligence or a related field.
+
+
+Technical Skills: Proficiency in Python, C++, and JavaScript.
+
+
+Core Concepts: Strong understanding of Data Structures and Algorithms, Object-Oriented Programming, Machine Learning, and Neural Networks.
+
+
+Tools & Libraries: Experience with Git, Matplotlib, TensorFlow, Pytorch, and Pandas.
+
+
+Experience: Demonstrated experience through projects in areas like cognitive performance prediction or medical image classification.
+
+
+Certifications: Completion of courses such as "Supervised Machine Learning" and "Neural Networks and Deep Learning" from platforms like Coursera is a plus."""

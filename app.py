@@ -4,7 +4,6 @@ import tempfile
 import shutil
 from pathlib import Path
 from src.agent.graph import SharedState, graph
-from src.agent.nodes import process_user_inputs
 
 # Page configuration
 st.set_page_config(
@@ -68,14 +67,12 @@ def main():
                             },
                             "final_decision": "Rejected",
                             "rejection_reason": "",
-                            "jd_text": jd_text
+                            "jd_text": jd_text,
+                            "cv_file_path": tmp_file_path
                         }
                         
-                        # Process user inputs
+                        # Run the analysis using the graph
                         shared_state = SharedState(**initial_state)
-                        shared_state = process_user_inputs(tmp_file_path, jd_text, shared_state)
-                        
-                        # Run the analysis
                         result = graph.invoke(shared_state)
                         
                         # Display results

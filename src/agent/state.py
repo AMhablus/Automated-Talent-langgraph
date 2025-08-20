@@ -24,6 +24,7 @@ class SharedState(TypedDict):
     skills_analysis: SkillAnalysis
     final_decision: Literal['Interview', 'Phone Screen', 'Rejected']
     rejection_reason: str
-    jd_text: str  # Store the job description text from user input
+    jd_text: str  
+    cv_file_path: str  
     
     

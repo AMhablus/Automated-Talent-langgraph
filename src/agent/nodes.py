@@ -7,17 +7,16 @@ from src.agent.prompts import skills_analysis_system_msg, rejected_system_msg, p
 import json
 from pydantic import SecretStr
 from langchain_community.document_loaders import PyPDFLoader
-from src.agent.examples import cv_ai, jd_ai
 import tempfile
 import shutil
 
 
 load_dotenv()
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-LLM = ChatGroq(model="openai/gpt-oss-120b", temperature=0, api_key=SecretStr(OPENAI_API_KEY) if OPENAI_API_KEY else None)
+GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+LLM = ChatGroq(model="openai/gpt-oss-120b", temperature=0, api_key=SecretStr(GROQ_API_KEY) if GROQ_API_KEY else None)
 
 
-def extract_pdf_txt(pdf_path: str, state: SharedState) -> str:
+def extract_pdf_txt(pdf_path: str) -> str:
     """Extract text from uploaded PDF file"""
     try:
         loader = PyPDFLoader(pdf_path)
@@ -27,10 +26,14 @@ def extract_pdf_txt(pdf_path: str, state: SharedState) -> str:
     except Exception as e:
         raise Exception(f"Error extracting text from PDF: {str(e)}")
 
-def process_user_inputs(cv_file_path: str, jd_text: str, state: SharedState) -> SharedState:
+def prescreening_analysis(state: SharedState) -> SharedState:
     """Process user uploaded CV (PDF) and JD (text) for analysis"""
+    # Get CV file path and JD text from state
+    cv_file_path = state["cv_file_path"]
+    jd_text = state["jd_text"]
+    
     # Extract text from CV PDF
-    cv_text = extract_pdf_txt(cv_file_path, state)
+    cv_text = extract_pdf_txt(cv_file_path)
     
     # Create messages for the LLM
     cv_message = HumanMessage(content=cv_text)
@@ -43,17 +46,9 @@ def process_user_inputs(cv_file_path: str, jd_text: str, state: SharedState) -> 
     
     try:
         data = json.loads(str(response.content))
-        
-        # Update the shared state
-        state["name"] = data["name"]
-        state["email"] = data["email"]
-        state["phone"] = data["phone"]
-        state["years_of_experience"] = data["years_of_experience"]
-        state["skills"] = data["skills"]
-        state["pre_screening_status"] = data["pre_screening_status"]
-        state["skills_analysis"] = data["skills_analysis"]
-        state["final_decision"] = data["final_decision"]
-        state["rejection_reason"] = data["rejection_reason"]
+        state.update(data)
+        # Ensure JD text is stored in state for skills analysis
+        state["jd_text"] = jd_text
         
     except json.JSONDecodeError as e:
         raise Exception(f"Error parsing LLM response: {str(e)}")
@@ -62,39 +57,12 @@ def process_user_inputs(cv_file_path: str, jd_text: str, state: SharedState) -> 
 
     return state
 
-def input_and_prescreening(state: SharedState) -> SharedState:
-    """Legacy function for hardcoded examples - kept for backward compatibility"""
-    cv_message = HumanMessage(content=cv_ai)
-    jd_message = HumanMessage(content=jd_ai)
-    sys_message = SystemMessage(content=prescreen_system_msg)
-    
-    messages = [sys_message, cv_message, jd_message]
-    
-    response = LLM.invoke(messages)
-    
-    data = json.loads(str(response.content))
-    
-    # Update the shared state
-    state["name"] = data["name"]
-    state["email"] = data["email"]
-    state["phone"] = data["phone"]
-    state["years_of_experience"] = data["years_of_experience"]
-    state["skills"] = data["skills"]
-    state["pre_screening_status"] = data["pre_screening_status"]
-    state["skills_analysis"] = data["skills_analysis"]
-    state["final_decision"] = data["final_decision"]
-    state["rejection_reason"] = data["rejection_reason"]
-
-    return state
-
-
 def skills_analysis(state: SharedState) -> SharedState:
     sys_message = SystemMessage(content=skills_analysis_system_msg)
     cv_skills = state["skills"]
-    cv_message = HumanMessage(content=", ".join(cv_skills) if isinstance(cv_skills, list) else str(cv_skills))
+    cv_message = HumanMessage(content=". Here are the skills: ".join(cv_skills) if isinstance(cv_skills, list) else str(cv_skills))
     
-    # Use the JD text from state if available, otherwise fall back to hardcoded example
-    jd_text = state.get("jd_text", jd_ai)
+    jd_text = state["jd_text"]
     jd_message = HumanMessage(content=jd_text)
     
     messages = [sys_message, cv_message, jd_message]
